@@ -114,3 +114,79 @@ class Dress(models.Model):
         verbose_name_plural = 'Платья'
 
 
+class CustomUser(AbstractUser):
+    GENDERS = (
+    ('Мужской', 'Мужской'),
+    ('Женский', 'Женский')
+    )
+    middle_name = models.CharField("Отчество", max_length=50, null=True, blank=True)
+    gender = models.CharField("Пол", max_length=10, choices=GENDERS, default='')
+
+    def __str__(self):
+        return f"{self.username}"
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+
+class PriceList(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'Новый'),
+    ]
+    number = models.CharField(max_length=20, verbose_name='Номер')
+    approval_date = models.DateField(verbose_name='Дата утверждения')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new', verbose_name='Статус')
+
+    def __str__(self):
+        return '%s' % (self.number)
+
+    class Meta:
+        verbose_name = 'Прайслист'
+        verbose_name_plural = 'Прайслисты'
+
+
+class PriceListPosition(models.Model):
+    price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE, verbose_name='Прайслист')
+    dress = models.ForeignKey(Dress, on_delete=models.CASCADE, verbose_name='Платье')
+    price = models.IntegerField(verbose_name='Цена')
+
+    def __str__(self):
+        return '%s' % (self.price_list)
+
+    class Meta:
+        verbose_name = 'Позиция прайслиста'
+        verbose_name_plural = 'Позиции прайслистов'
+
+
+class Customer(models.Model):
+    first_name = models.CharField(max_length=120, verbose_name='Имя')
+    second_name = models.CharField(max_length=120, verbose_name='Фамилия')
+    last_name = models.CharField(max_length=120, verbose_name='Отчество')
+    phone_number = models.CharField(max_length=18, verbose_name='Номер телефона')
+    adress = models.CharField(max_length=120, verbose_name='Адрес')
+    email_adress = models.EmailField(verbose_name='Адрес')
+
+    def __str__(self):
+        return '%s' % (self.first_name)
+
+    class Meta:
+        verbose_name = 'Клиент'
+        verbose_name_plural = 'Клиенты'
+
+
+class RecordingForFitting(models.Model):
+    date_of_fitting = models.DateField(verbose_name='Дата примерки')
+    time_of_fitting = models.TimeField(verbose_name='Время примерки')
+    status = models.CharField(max_length=20, verbose_name='Статус')
+    commentary = models.TextField(verbose_name='Комментарий')
+    dress = models.ForeignKey(Dress, on_delete=models.CASCADE, verbose_name='Платье')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name='Клиент')
+    employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Сотрудник')
+
+    def __str__(self):
+        return '%s' % (self.date_of_fitting)
+
+    class Meta:
+        verbose_name = 'Запись на примерку'
+        verbose_name_plural = 'Записи на примерки'
